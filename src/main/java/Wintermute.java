@@ -13,7 +13,7 @@ public class Wintermute {
 
 	public static void main(String[] args) {
 
-		if (args[0].equals("-help")) {
+		if (args.length == 0 || args[0].equals("-help")) {
 			System.out.println(
 					"This discord bot responds to any message containing \"I'm,\" \"Im,\" or \"I am\" with "
 					+ "\"Hi, <text after wake sequence>, I'm Wintermute.\" This bot requires a valid bot token, passed as an argument. "
@@ -63,16 +63,13 @@ public class Wintermute {
 		api.addMessageCreateListener(event -> {
 			System.out.println("Heard message: " + event.getMessageContent());
 			if (event.getMessageContent().length() >= 5) {
-				if (containsIm(event.getMessageContent()) == 0 && getEnabled(event.getServer())) {
-					updateEnabled(event.getServer(), true);
+				if (containsIm(event.getMessageContent(), "i'm") && getEnabled(event.getServer())) {
 					event.getChannel().sendMessage(reply(event.getMessageContent(), "i'm"));
-
-				} else if (containsIm(event.getMessageContent()) == 1 && getEnabled(event.getServer())) {
-					updateEnabled(event.getServer(), true);
+					
+				} else if (containsIm(event.getMessageContent(), "im") && getEnabled(event.getServer())) {
 					event.getChannel().sendMessage(reply(event.getMessageContent(), "im"));
 
-				} else if (containsIm(event.getMessageContent()) == 2 && getEnabled(event.getServer())) {
-					updateEnabled(event.getServer(), true);
+				} else if (containsIm(event.getMessageContent(), "i am") && getEnabled(event.getServer())) {
 					event.getChannel().sendMessage(reply(event.getMessageContent(), "i am"));
 				}
 			}
@@ -97,6 +94,8 @@ public class Wintermute {
 		System.out.println("sending message...");
 		String reply = "";
 		String s = message;
+		// Goes through the sentence one character at a time, stopping at any common punctuation that is not
+		// preceded by a space
 		for (int i = 0 + substring.length(); i < s.length(); i++) {
 			if (s.charAt(i) == '.' || s.charAt(i) == '!' || s.charAt(i) == '?' || s.charAt(i) == ',') {
 				if (s.charAt(i - 1) != ' ') {
@@ -108,20 +107,11 @@ public class Wintermute {
 		return "Hi," + reply + ". I'm Wintermute.";
 	}
 
-	static int containsIm(String s) {
-		System.out.println("Testing containsIm...");
-		if (s.toLowerCase().substring(0, 4).equals("i'm ")) {
-			return 0;
-			// case A: i'm
-		} else if (s.toLowerCase().substring(0, 3).equals("im ")) {
-			return 1;
-			// case B: im
-		} else if (s.toLowerCase().substring(0, 5).equals("i am ")) {
-			return 2;
-			// case C: i am
+	static boolean containsIm(String s, String test) {
+		if(s.toLowerCase().substring(0, test.length()).equals(test)) {
+			return true;
 		} else {
-			return -1;
+			return false;
 		}
 	}
-
 }
