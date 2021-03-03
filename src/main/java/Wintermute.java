@@ -9,30 +9,27 @@ import org.javacord.api.entity.server.Server;
 
 public class Wintermute {
 	static HashMap<Server, Boolean> enabled = new HashMap<Server, Boolean>();
-	//static String token = ""; token is now a command line argument
 
 	public static void main(String[] args) {
-
-		if (args.length == 0 || args[0].equals("-help")) {
-			System.out.println(
-					"This discord bot responds to any message containing \"I'm,\" \"Im,\" or \"I am\" with "
-					+ "\"Hi, <text after wake sequence>, I'm Wintermute.\" This bot requires a valid bot token, passed as an argument. "
-					+ "\nExample usage:"
-					+ "\njava -jar Wintermute.jar <token>");
-			System.exit(0);
-		}
-
 		DiscordApi api = null;
-		try {
-			api = new DiscordApiBuilder().setToken(args[0]).login().join();
-		}catch(IllegalStateException e) {
-			System.out.println("Invalid bot token. Use the -help flag for more help.");
-			System.exit(0);
-		}catch(CompletionException e) {
-			System.out.println("Invalid bot token. Use the -help flag for more help.");
+		
+		if (args.length == 0 || args[0].equals("-help")) {
+			System.out.println("This discord bot responds to any message containing \"I'm,\" \"Im,\" or \"I am\" with "
+					+ "\"Hi, <text after wake sequence>, I'm Wintermute.\" This bot requires a valid bot token, passed as an argument. "
+					+ "\nExample usage:" + "\njava -jar Wintermute.jar <token>");
 			System.exit(0);
 		}
 		
+		try {
+			api = new DiscordApiBuilder().setToken(args[0]).login().join();
+		} catch (IllegalStateException e) {
+			System.out.println("Invalid bot token. Use the -help flag for more help.");
+			System.exit(0);
+		} catch (CompletionException e) {
+			System.out.println("Invalid bot token. Use the -help flag for more help.");
+			System.exit(0);
+		}
+
 		// listens for system commands
 		api.addMessageCreateListener(event -> {
 			// listen for enable/disable relevant commands
@@ -61,24 +58,40 @@ public class Wintermute {
 
 		// listen for messages with "I'm", "Im", or "I am" in them
 		api.addMessageCreateListener(event -> {
+			String firstSentence = event.getMessageContent().split("[,?!.]")[0].strip();
+
 			System.out.println("Heard message: " + event.getMessageContent());
 			if (event.getMessageContent().length() >= 5) {
-				if (containsIm(event.getMessageContent(), "i'm") && getEnabled(event.getServer())) {
-					event.getChannel().sendMessage(reply(event.getMessageContent(), "i'm"));
-					
-				} else if (containsIm(event.getMessageContent(), "im") && getEnabled(event.getServer())) {
-					event.getChannel().sendMessage(reply(event.getMessageContent(), "im"));
+				if (containsIm(firstSentence, "i'm") && getEnabled(event.getServer())) {
+					event.getChannel().sendMessage("Hi,"
+							+ firstSentence.substring("i'm".length(), firstSentence.length()) + ". I'm Wintermute.");
 
-				} else if (containsIm(event.getMessageContent(), "i am") && getEnabled(event.getServer())) {
-					event.getChannel().sendMessage(reply(event.getMessageContent(), "i am"));
+				} else if (containsIm(firstSentence, "im") && getEnabled(event.getServer())) {
+					event.getChannel().sendMessage("Hi,"
+							+ firstSentence.substring("im".length(), firstSentence.length()) + ". I'm Wintermute.");
+
+				} else if (containsIm(firstSentence, "i am") && getEnabled(event.getServer())) {
+					event.getChannel().sendMessage("Hi,"
+							+ firstSentence.substring("i am".length(), firstSentence.length()) + ". I'm Wintermute.");
 				}
 			}
 		});
 
-		// Print the client id of the bot
+		// Print the client id of the bot to know when and/or whether the bot managed to connect.  
 		System.out.println("Logged in as " + api.getClientId());
 	}
 
+	static boolean containsIm(String s, String test) {
+		System.out.println(s.charAt(test.length()) == ' ');
+
+		if (s.toLowerCase().substring(0, test.length()).equals(test)
+		 && s.charAt(test.length()) == ' ') {
+			return true;
+		} else {
+			return false;
+		}
+	}
+	
 	static boolean getEnabled(Optional<Server> server) {
 		enabled.putIfAbsent(server.get(), true);
 		return enabled.get(server.get());
@@ -88,30 +101,5 @@ public class Wintermute {
 		System.out.println("Updating enabled to " + b + " for server " + server.get());
 		enabled.put(server.get(), b);
 		System.out.println(enabled.toString());
-	}
-
-	static String reply(String message, String substring) {
-		System.out.println("sending message...");
-		String reply = "";
-		String s = message;
-		// Goes through the sentence one character at a time, stopping at any common punctuation that is not
-		// preceded by a space
-		for (int i = 0 + substring.length(); i < s.length(); i++) {
-			if (s.charAt(i) == '.' || s.charAt(i) == '!' || s.charAt(i) == '?' || s.charAt(i) == ',') {
-				if (s.charAt(i - 1) != ' ') {
-					return "Hi," + reply + ". I'm Wintermute.";
-				}
-			}
-			reply += s.charAt(i);
-		}
-		return "Hi," + reply + ". I'm Wintermute.";
-	}
-
-	static boolean containsIm(String s, String test) {
-		if(s.toLowerCase().substring(0, test.length()).equals(test)) {
-			return true;
-		} else {
-			return false;
-		}
 	}
 }
