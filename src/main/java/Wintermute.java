@@ -61,7 +61,7 @@ public class Wintermute {
 			String firstSentence = event.getMessageContent().split("[,?!.]")[0].strip();
 
 			System.out.println("Heard message: " + event.getMessageContent());
-			if (event.getMessageContent().length() >= 5) {
+			if (firstSentence.length() >= 5) {
 				if (containsIm(firstSentence, "i'm") && getEnabled(event.getServer())) {
 					event.getChannel().sendMessage("Hi,"
 							+ firstSentence.substring("i'm".length(), firstSentence.length()) + ". I'm Wintermute.");
