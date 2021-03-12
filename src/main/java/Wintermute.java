@@ -65,11 +65,11 @@ public class Wintermute {
 
 			System.out.println("Heard message: " + event.getMessageContent());
 			if (firstSentence.length() >= 5 && getEnabled(event.getServer())) {
-				if (firstSentence.startsWith("i'm")) {
+				if (firstSentence.startsWith("i'm ")) {
 					event.getChannel().sendMessage(makeReply(firstSentence, "i'm", api, event.getServer().get()));
-				} else if (firstSentence.startsWith("im")) {
+				} else if (firstSentence.startsWith("im ")) {
 					event.getChannel().sendMessage(makeReply(firstSentence, "im", api, event.getServer().get()));
-				} else if (firstSentence.startsWith("i am")) {
+				} else if (firstSentence.startsWith("i am ")) {
 					event.getChannel().sendMessage(makeReply(firstSentence, "i am", api, event.getServer().get()));
 				}
 			}
