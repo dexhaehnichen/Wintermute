@@ -9,9 +9,12 @@ import org.javacord.api.entity.server.Server;
 
 public class Wintermute {
 	static HashMap<Server, Boolean> enabled = new HashMap<Server, Boolean>();
-
+	static DiscordApi api = null;
+	
 	public static void main(String[] args) {
-		DiscordApi api = null;
+
+		//Since Wintermute is meant to be run from the command line, I have this little help message for people
+		//who don't know what they're doing. 
 		
 		if (args.length == 0 || args[0].equals("-help")) {
 			System.out.println("This discord bot responds to any message containing \"I'm,\" \"Im,\" or \"I am\" with "
@@ -19,7 +22,7 @@ public class Wintermute {
 					+ "\nExample usage:" + "\njava -jar Wintermute.jar <token>");
 			System.exit(0);
 		}
-		
+
 		try {
 			api = new DiscordApiBuilder().setToken(args[0]).login().join();
 		} catch (IllegalStateException e) {
@@ -58,38 +61,36 @@ public class Wintermute {
 
 		// listen for messages with "I'm", "Im", or "I am" in them
 		api.addMessageCreateListener(event -> {
-			String firstSentence = event.getMessageContent().split("[,?!.]")[0].strip();
+			String firstSentence = event.getMessageContent().split("[,?!.]")[0].strip().toLowerCase();
 
 			System.out.println("Heard message: " + event.getMessageContent());
-			if (firstSentence.length() >= 5) {
-				if (containsIm(firstSentence, "i'm") && getEnabled(event.getServer())) {
-					event.getChannel().sendMessage("Hi,"
-							+ firstSentence.substring("i'm".length(), firstSentence.length()) + ". I'm Wintermute.");
-
-				} else if (containsIm(firstSentence, "im") && getEnabled(event.getServer())) {
-					event.getChannel().sendMessage("Hi,"
-							+ firstSentence.substring("im".length(), firstSentence.length()) + ". I'm Wintermute.");
-
-				} else if (containsIm(firstSentence, "i am") && getEnabled(event.getServer())) {
-					event.getChannel().sendMessage("Hi,"
-							+ firstSentence.substring("i am".length(), firstSentence.length()) + ". I'm Wintermute.");
+			if (firstSentence.length() >= 5 && getEnabled(event.getServer())) {
+				if (firstSentence.startsWith("i'm ")) {
+					event.getChannel().sendMessage(makeReply(firstSentence, "i'm", api, event.getServer().get()));
+				} else if (firstSentence.startsWith("im ")) {
+					event.getChannel().sendMessage(makeReply(firstSentence, "im", api, event.getServer().get()));
+				} else if (firstSentence.startsWith("i am ")) {
+					event.getChannel().sendMessage(makeReply(firstSentence, "i am", api, event.getServer().get()));
 				}
 			}
 		});
 
-		// Print the client id of the bot to know when and/or whether the bot managed to connect.  
+		// Print the client id of the bot to know when and/or whether the bot managed to
+		// connect.
 		System.out.println("Logged in as " + api.getClientId());
+
 	}
 
-	static boolean containsIm(String s, String test) {
-		System.out.println(s.charAt(test.length()) == ' ');
-
-		if (s.toLowerCase().substring(0, test.length()).equals(test)
-		 && s.charAt(test.length()) == ' ') {
-			return true;
+	static String makeReply(String sentence, String imType, DiscordApi api, Server server) {
+		String nickname;
+		
+		if(api.getYourself().getNickname(server).isEmpty()) { 
+			nickname = "Wintermute";
 		} else {
-			return false;
+			nickname = api.getYourself().getNickname(server).get();
 		}
+			
+		return "Hi," + sentence.substring(imType.length(), sentence.length()) + ". I'm " + nickname;
 	}
 	
 	static boolean getEnabled(Optional<Server> server) {
