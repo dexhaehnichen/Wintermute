@@ -1,5 +1,6 @@
 
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Optional;
 import java.util.concurrent.CompletionException;
 
@@ -10,12 +11,15 @@ import org.javacord.api.entity.server.Server;
 public class Wintermute {
 	static HashMap<Server, Boolean> enabled = new HashMap<Server, Boolean>();
 	static DiscordApi api = null;
-	
+
 	public static void main(String[] args) {
 
-		//Since Wintermute is meant to be run from the command line, I have this little help message for people
-		//who don't know what they're doing. 
-		
+		String[] variationsOfIm = { "i'm", "im", "i am", "l'm", "lm", "l am" };
+
+		// Since Wintermute is meant to be run from the command line, I have this little
+		// help message for people
+		// who don't know what they're doing.
+
 		if (args.length == 0 || args[0].equals("-help")) {
 			System.out.println("This discord bot responds to any message containing \"I'm,\" \"Im,\" or \"I am\" with "
 					+ "\"Hi, <text after wake sequence>, I'm Wintermute.\" This bot requires a valid bot token, passed as an argument. "
@@ -65,14 +69,11 @@ public class Wintermute {
 
 			System.out.println("Heard message: " + event.getMessageContent());
 			if (firstSentence.length() >= 5 && getEnabled(event.getServer())) {
-				// I have Wintermute set to trigger on lowercase 'L's because they look identical to uppercase 'I's in 
-				// discord. 
-				if (firstSentence.startsWith("i'm ") || firstSentence.startsWith("l'm ")) {
+				// I have Wintermute set to trigger on lowercase 'L's because they look
+				// identical to uppercase 'I's in
+				// discord.
+				if (containsIm(firstSentence, variationsOfIm)) {
 					event.getChannel().sendMessage(makeReply(firstSentence, "i'm", api, event.getServer().get()));
-				} else if (firstSentence.startsWith("im ") || firstSentence.startsWith("lm ")) {
-					event.getChannel().sendMessage(makeReply(firstSentence, "im", api, event.getServer().get()));
-				} else if (firstSentence.startsWith("i am ") || firstSentence.startsWith("l am ")) {
-					event.getChannel().sendMessage(makeReply(firstSentence, "i am", api, event.getServer().get()));
 				}
 			}
 		});
@@ -83,18 +84,42 @@ public class Wintermute {
 
 	}
 
+	static boolean containsIm(String stringToTest, String[] testStrings) {
+		boolean containsIm = false;
+		
+		// For each test string, check if the string to test starts with the test string.
+		for (int i = 0; i < testStrings.length; i++) {
+			if(stringToTest.startsWith(testStrings[i] + " ")) {
+				containsIm = true;
+				
+				// If the string to test starts with the test string, for each test string, see if the 
+				// part of the string to test that comes after the first test string starts with-
+				// wait a second...
+				// I think I have a better idea on how to do this.
+				
+				for (int j = 0; j < testStrings.length; j++) {
+					if(stringToTest.substring(testStrings[i].length()+1).startsWith(testStrings[j] + " ")) {
+						containsIm = false;
+					}
+				}
+			}
+		}
+		
+		return containsIm;
+	}
+
 	static String makeReply(String sentence, String imType, DiscordApi api, Server server) {
 		String nickname;
-		
-		if(api.getYourself().getNickname(server).isEmpty()) { 
+
+		if (api.getYourself().getNickname(server).isEmpty()) {
 			nickname = "Wintermute";
 		} else {
 			nickname = api.getYourself().getNickname(server).get();
 		}
-			
+
 		return "Hi," + sentence.substring(imType.length(), sentence.length()) + ". I'm " + nickname;
 	}
-	
+
 	static boolean getEnabled(Optional<Server> server) {
 		enabled.putIfAbsent(server.get(), true);
 		return enabled.get(server.get());
