@@ -14,6 +14,9 @@ public class Wintermute {
 
 	public static void main(String[] args) {
 
+		// I have Wintermute set to trigger on lowercase 'L's because they look
+		// identical to uppercase 'I's in
+		// discord.
 		String[] variationsOfIm = { "i'm", "im", "i am", "l'm", "lm", "l am" };
 
 		// Since Wintermute is meant to be run from the command line, I have this little
@@ -69,9 +72,6 @@ public class Wintermute {
 
 			System.out.println("Heard message: " + event.getMessageContent());
 			if (firstSentence.length() >= 5 && getEnabled(event.getServer())) {
-				// I have Wintermute set to trigger on lowercase 'L's because they look
-				// identical to uppercase 'I's in
-				// discord.
 				if (containsIm(firstSentence, variationsOfIm)) {
 					event.getChannel().sendMessage(makeReply(firstSentence, "i'm", api, event.getServer().get()));
 				}
@@ -86,19 +86,18 @@ public class Wintermute {
 
 	static boolean containsIm(String stringToTest, String[] testStrings) {
 		boolean containsIm = false;
+		String[] wordsToTest = stringToTest.split(" ");
 		
-		// For each test string, check if the string to test starts with the test string.
+		// For each test string, check if the first word of the string to test is equal to the test string.
+		// If it is, change containsIm to true
 		for (int i = 0; i < testStrings.length; i++) {
-			if(stringToTest.startsWith(testStrings[i] + " ")) {
+			if(wordsToTest[0].equals(testStrings[i])) {
 				containsIm = true;
 				
-				// If the string to test starts with the test string, for each test string, see if the 
-				// part of the string to test that comes after the first test string starts with-
-				// wait a second...
-				// I think I have a better idea on how to do this.
-				
+				// If the first word of the string to test is equal to the test string, check if the second word is
+				// *also* equal to a test string. If it is, then change containsIm back to false.
 				for (int j = 0; j < testStrings.length; j++) {
-					if(stringToTest.substring(testStrings[i].length()+1).startsWith(testStrings[j] + " ")) {
+					if(wordsToTest[1].equals(testStrings[j])) {
 						containsIm = false;
 					}
 				}
