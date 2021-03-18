@@ -116,7 +116,7 @@ public class Wintermute {
 			nickname = api.getYourself().getNickname(server).get();
 		}
 
-		return "Hi," + sentence.substring(imType.length(), sentence.length()) + ". I'm " + nickname;
+		return "Hi, " + sentence.substring(imType.length(), sentence.length()) + ". I'm " + nickname + ".";
 	}
 
 	static boolean getEnabled(Optional<Server> server) {
