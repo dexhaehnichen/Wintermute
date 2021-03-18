@@ -1,5 +1,6 @@
 
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Optional;
 import java.util.concurrent.CompletionException;
 
@@ -10,12 +11,18 @@ import org.javacord.api.entity.server.Server;
 public class Wintermute {
 	static HashMap<Server, Boolean> enabled = new HashMap<Server, Boolean>();
 	static DiscordApi api = null;
-	
+
 	public static void main(String[] args) {
 
-		//Since Wintermute is meant to be run from the command line, I have this little help message for people
-		//who don't know what they're doing. 
-		
+		// I have Wintermute set to trigger on lowercase 'L's because they look
+		// identical to uppercase 'I's in
+		// discord.
+		String[] variationsOfIm = { "i'm", "im", "i am", "l'm", "lm", "l am" };
+
+		// Since Wintermute is meant to be run from the command line, I have this little
+		// help message for people
+		// who don't know what they're doing.
+
 		if (args.length == 0 || args[0].equals("-help")) {
 			System.out.println("This discord bot responds to any message containing \"I'm,\" \"Im,\" or \"I am\" with "
 					+ "\"Hi, <text after wake sequence>, I'm Wintermute.\" This bot requires a valid bot token, passed as an argument. "
@@ -65,12 +72,8 @@ public class Wintermute {
 
 			System.out.println("Heard message: " + event.getMessageContent());
 			if (firstSentence.length() >= 5 && getEnabled(event.getServer())) {
-				if (firstSentence.startsWith("i'm ")) {
+				if (containsIm(firstSentence, variationsOfIm)) {
 					event.getChannel().sendMessage(makeReply(firstSentence, "i'm", api, event.getServer().get()));
-				} else if (firstSentence.startsWith("im ")) {
-					event.getChannel().sendMessage(makeReply(firstSentence, "im", api, event.getServer().get()));
-				} else if (firstSentence.startsWith("i am ")) {
-					event.getChannel().sendMessage(makeReply(firstSentence, "i am", api, event.getServer().get()));
 				}
 			}
 		});
@@ -81,18 +84,41 @@ public class Wintermute {
 
 	}
 
+	static boolean containsIm(String stringToTest, String[] testStrings) {
+		boolean containsIm = false;
+		String[] wordsToTest = stringToTest.split(" ");
+		
+		// For each test string, check if the first word of the string to test is equal to the test string.
+		// If it is, change containsIm to true
+		for (int i = 0; i < testStrings.length; i++) {
+			if(wordsToTest[0].equals(testStrings[i])) {
+				containsIm = true;
+				
+				// If the first word of the string to test is equal to the test string, check if the second word is
+				// *also* equal to a test string. If it is, then change containsIm back to false.
+				for (int j = 0; j < testStrings.length; j++) {
+					if(wordsToTest[1].equals(testStrings[j])) {
+						containsIm = false;
+					}
+				}
+			}
+		}
+		
+		return containsIm;
+	}
+
 	static String makeReply(String sentence, String imType, DiscordApi api, Server server) {
 		String nickname;
-		
-		if(api.getYourself().getNickname(server).isEmpty()) { 
+
+		if (api.getYourself().getNickname(server).isEmpty()) {
 			nickname = "Wintermute";
 		} else {
 			nickname = api.getYourself().getNickname(server).get();
 		}
-			
+
 		return "Hi," + sentence.substring(imType.length(), sentence.length()) + ". I'm " + nickname;
 	}
-	
+
 	static boolean getEnabled(Optional<Server> server) {
 		enabled.putIfAbsent(server.get(), true);
 		return enabled.get(server.get());
