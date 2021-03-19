@@ -1,3 +1,5 @@
+package Wintermute;
+
 
 import java.util.HashMap;
 import java.util.Iterator;
@@ -72,8 +74,9 @@ public class Wintermute {
 
 			System.out.println("Heard message: " + event.getMessageContent());
 			if (firstSentence.length() >= 5 && getEnabled(event.getServer())) {
-				if (containsIm(firstSentence, variationsOfIm)) {
-					event.getChannel().sendMessage(makeReply(firstSentence, "i'm", api, event.getServer().get()));
+				String imPrefix = containsIm(firstSentence, variationsOfIm);
+				if (imPrefix != null) {
+					event.getChannel().sendMessage(makeReply(firstSentence, imPrefix, api, event.getServer().get()));
 				}
 			}
 		});
@@ -84,21 +87,21 @@ public class Wintermute {
 
 	}
 
-	static boolean containsIm(String stringToTest, String[] testStrings) {
-		boolean containsIm = false;
-		String[] wordsToTest = stringToTest.split(" ");
+	public static String containsIm(String stringToTest, String[] testStrings) {
+		String containsIm = null;
 		
 		// For each test string, check if the first word of the string to test is equal to the test string.
 		// If it is, change containsIm to true
 		for (int i = 0; i < testStrings.length; i++) {
-			if(wordsToTest[0].equals(testStrings[i])) {
-				containsIm = true;
+			if(stringToTest.startsWith(testStrings[i])) {
+				containsIm = testStrings[i];
 				
 				// If the first word of the string to test is equal to the test string, check if the second word is
 				// *also* equal to a test string. If it is, then change containsIm back to false.
 				for (int j = 0; j < testStrings.length; j++) {
-					if(wordsToTest[1].equals(testStrings[j])) {
-						containsIm = false;
+					System.out.println(stringToTest.substring(testStrings[i].length()));
+					if(stringToTest.substring(testStrings[i].length() + 1).startsWith(testStrings[j])) {
+						containsIm = null;
 					}
 				}
 			}
@@ -107,7 +110,7 @@ public class Wintermute {
 		return containsIm;
 	}
 
-	static String makeReply(String sentence, String imType, DiscordApi api, Server server) {
+	public static String makeReply(String sentence, String imType, DiscordApi api, Server server) {
 		String nickname;
 
 		if (api.getYourself().getNickname(server).isEmpty()) {
@@ -116,15 +119,15 @@ public class Wintermute {
 			nickname = api.getYourself().getNickname(server).get();
 		}
 
-		return "Hi," + sentence.substring(imType.length(), sentence.length()) + ". I'm " + nickname;
+		return "Hi," + sentence.substring(imType.length(), sentence.length()) + ". I'm " + nickname + ".";
 	}
 
-	static boolean getEnabled(Optional<Server> server) {
+	public static boolean getEnabled(Optional<Server> server) {
 		enabled.putIfAbsent(server.get(), true);
 		return enabled.get(server.get());
 	}
 
-	static void updateEnabled(Optional<Server> server, boolean b) {
+	public static void updateEnabled(Optional<Server> server, boolean b) {
 		System.out.println("Updating enabled to " + b + " for server " + server.get());
 		enabled.put(server.get(), b);
 		System.out.println(enabled.toString());
