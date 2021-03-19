@@ -87,18 +87,18 @@ public class Wintermute {
 
 	static String containsIm(String stringToTest, String[] testStrings) {
 		String containsIm = null;
-		String[] wordsToTest = stringToTest.split(" ");
 		
 		// For each test string, check if the first word of the string to test is equal to the test string.
 		// If it is, change containsIm to true
 		for (int i = 0; i < testStrings.length; i++) {
-			if(wordsToTest[0].equals(testStrings[i])) {
+			if(stringToTest.startsWith(testStrings[i])) {
 				containsIm = testStrings[i];
 				
 				// If the first word of the string to test is equal to the test string, check if the second word is
 				// *also* equal to a test string. If it is, then change containsIm back to false.
 				for (int j = 0; j < testStrings.length; j++) {
-					if(wordsToTest[1].equals(testStrings[j])) {
+					System.out.println(stringToTest.substring(testStrings[i].length()));
+					if(stringToTest.substring(testStrings[i].length() + 1).startsWith(testStrings[j])) {
 						containsIm = null;
 					}
 				}
