@@ -1,3 +1,5 @@
+package Wintermute;
+
 
 import java.util.HashMap;
 import java.util.Iterator;
@@ -85,7 +87,7 @@ public class Wintermute {
 
 	}
 
-	static String containsIm(String stringToTest, String[] testStrings) {
+	public static String containsIm(String stringToTest, String[] testStrings) {
 		String containsIm = null;
 		
 		// For each test string, check if the first word of the string to test is equal to the test string.
@@ -108,7 +110,7 @@ public class Wintermute {
 		return containsIm;
 	}
 
-	static String makeReply(String sentence, String imType, DiscordApi api, Server server) {
+	public static String makeReply(String sentence, String imType, DiscordApi api, Server server) {
 		String nickname;
 
 		if (api.getYourself().getNickname(server).isEmpty()) {
@@ -120,12 +122,12 @@ public class Wintermute {
 		return "Hi," + sentence.substring(imType.length(), sentence.length()) + ". I'm " + nickname + ".";
 	}
 
-	static boolean getEnabled(Optional<Server> server) {
+	public static boolean getEnabled(Optional<Server> server) {
 		enabled.putIfAbsent(server.get(), true);
 		return enabled.get(server.get());
 	}
 
-	static void updateEnabled(Optional<Server> server, boolean b) {
+	public static void updateEnabled(Optional<Server> server, boolean b) {
 		System.out.println("Updating enabled to " + b + " for server " + server.get());
 		enabled.put(server.get(), b);
 		System.out.println(enabled.toString());
