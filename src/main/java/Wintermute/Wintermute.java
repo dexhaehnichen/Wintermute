@@ -70,7 +70,7 @@ public class Wintermute {
 
 		// listen for messages with "I'm", "Im", or "I am" in them
 		api.addMessageCreateListener(event -> {
-			String firstSentence = event.getMessageContent().split("[,?!.]")[0].strip().toLowerCase();
+			String firstSentence = event.getMessageContent().split("(?<!<@)[,?!.]")[0].strip().toLowerCase();
 
 			System.out.println("Heard message: " + event.getMessageContent());
 			if (firstSentence.length() >= 5 && getEnabled(event.getServer())) {
