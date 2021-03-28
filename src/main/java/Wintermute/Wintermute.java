@@ -70,7 +70,7 @@ public class Wintermute {
 
 		// listen for messages with "I'm", "Im", or "I am" in them
 		api.addMessageCreateListener(event -> {
-			String firstSentence = event.getMessageContent().split("[,?!.]")[0].strip().toLowerCase();
+			String firstSentence = event.getMessageContent().split("(?<!<@)[,?!.]")[0].strip().toLowerCase();
 
 			System.out.println("Heard message: " + event.getMessageContent());
 			if (firstSentence.length() >= 5 && getEnabled(event.getServer())) {
@@ -96,10 +96,12 @@ public class Wintermute {
 			if(stringToTest.startsWith(testStrings[i])) {
 				containsIm = testStrings[i];
 				
+				//Solve "improvisation" bug (again) by checking if there is a space after the word. 
+				if(stringToTest.charAt(testStrings[i].length()) != ' ') containsIm = null;
+				
 				// If the first word of the string to test is equal to the test string, check if the second word is
 				// *also* equal to a test string. If it is, then change containsIm back to false.
 				for (int j = 0; j < testStrings.length; j++) {
-					System.out.println(stringToTest.substring(testStrings[i].length()));
 					if(stringToTest.substring(testStrings[i].length() + 1).startsWith(testStrings[j])) {
 						containsIm = null;
 					}
